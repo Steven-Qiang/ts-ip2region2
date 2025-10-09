@@ -1,0 +1,35 @@
+# Source files
+src/
+temp/
+
+# Build artifacts
+build/
+node_modules/
+
+# Git and CI
+.git/
+.github/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Development files
+test.js
+example.js
+tsconfig.json
+.releaserc.json
+
+# IDE
+.vscode/
+.idea/
+
+# Environment
+.env*
+
+# Data files
+data/

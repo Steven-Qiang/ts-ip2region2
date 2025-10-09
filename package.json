@@ -1,0 +1,77 @@
+{
+  "name": "ts-ip2region2",
+  "version": "1.0.0",
+  "description": "TypeScript-first ip2region implementation with native Node.js addon. Ultra-fast IPv4/IPv6 geolocation queries.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "node-gyp rebuild",
+    "compile": "tsc",
+    "build:all": "npm run build && npm run compile",
+    "rebuild": "node-gyp rebuild",
+    "clean": "node-gyp clean",
+    "test": "npm run build:all && node test.js",
+    "example": "npm run build:all && node example.js",
+    "prepublishOnly": "npm run build:all",
+    "semantic-release": "semantic-release"
+  },
+  "keywords": [
+    "typescript",
+    "ip2region",
+    "geolocation",
+    "ipv4",
+    "ipv6",
+    "native-addon",
+    "high-performance",
+    "xdb",
+    "ip-lookup"
+  ],
+  "author": "Steven Qiang <git@qiangmou.ren>",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Steven-Qiang/ts-ip2region2.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Steven-Qiang/ts-ip2region2/issues"
+  },
+  "homepage": "https://github.com/Steven-Qiang/ts-ip2region2#readme",
+  "dependencies": {
+    "node-addon-api": "^7.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.19",
+    "node-gyp": "^10.0.0",
+    "typescript": "^5.9.3",
+    "semantic-release": "^22.0.0",
+    "@semantic-release/changelog": "^6.0.0",
+    "@semantic-release/commit-analyzer": "^11.0.0",
+    "@semantic-release/git": "^10.0.0",
+    "@semantic-release/github": "^9.0.0",
+    "@semantic-release/release-notes-generator": "^12.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "os": [
+    "darwin",
+    "linux",
+    "win32"
+  ],
+  "cpu": [
+    "x64",
+    "arm64"
+  ],
+  "files": [
+    "dist/**/*",
+    "addon.cpp",
+    "ip2region/**/*",
+    "binding.gyp",
+    "README.md",
+    "README_CN.md"
+  ],
+  "gypfile": true,
+  "publishConfig": {
+    "access": "public"
+  }
+}
