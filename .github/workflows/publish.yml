@@ -5,11 +5,10 @@ on:
     branches: [main]
 
 permissions:
-  contents: write # to be able to publish a GitHub release
-  issues: write # to be able to comment on released issues
-  pull-requests: write # to be able to comment on released pull requests
-  id-token: write # to enable use of OIDC for npm provenance
-  packages: write
+  contents: write
+  issues: write
+  pull-requests: write
+  id-token: write
 
 jobs:
   release:
@@ -20,21 +19,22 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Use Node.js 18
+      - name: setup node
         uses: actions/setup-node@v4
         with:
-          registry-url: 'https://registry.npmjs.org'
-          node-version: 18
+          node-version: '20.x'
           always-auth: true
-          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
 
-      - run: npm ci
-      
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build and compile
+        run: npm run build:all
+
       - name: Release
         run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
