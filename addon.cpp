@@ -3,12 +3,12 @@
 #endif
 
 #include <napi.h>
+#include <string>
+#include <cstdio>
 
 extern "C" {
 #include "ip2region/xdb_api.h"
 }
-
-#include <memory>
 
 class Ip2RegionSearcher : public Napi::ObjectWrap<Ip2RegionSearcher> {
 public:
@@ -51,13 +51,8 @@ Ip2RegionSearcher::Ip2RegionSearcher(const Napi::CallbackInfo& info)
     Napi::Env env = info.Env();
     Napi::HandleScope scope(env);
 
-    if (info.Length() < 1) {
-        Napi::TypeError::New(env, "Expected at least 1 argument").ThrowAsJavaScriptException();
-        return;
-    }
-
-    if (!info[0].IsString()) {
-        Napi::TypeError::New(env, "Expected string for db_path").ThrowAsJavaScriptException();
+    if (info.Length() < 1 || !info[0].IsString()) {
+        Napi::TypeError::New(env, "Expected database path as string").ThrowAsJavaScriptException();
         return;
     }
 
@@ -77,56 +72,53 @@ Ip2RegionSearcher::Ip2RegionSearcher(const Napi::CallbackInfo& info)
         }
     }
 
-    // 初始化winsock (Windows)
+    // Initialize winsock (Windows only)
     int err = xdb_init_winsock();
     if (err != 0) {
-        Napi::Error::New(env, "Failed to init winsock").ThrowAsJavaScriptException();
+        Napi::Error::New(env, "Failed to initialize network layer").ThrowAsJavaScriptException();
         return;
     }
 
-    // 验证xdb文件 (跳过严格验证，因为某些xdb文件可能有兼容性问题)
-    // err = xdb_verify_from_file(db_path.c_str());
-    // if (err != 0) {
-    //     std::string error_msg = "Failed to verify xdb file, error code: " + std::to_string(err);
-    //     Napi::Error::New(env, error_msg).ThrowAsJavaScriptException();
-    //     return;
-    // }
-
-    // 确定IP版本
-    xdb_version_t* version;
-    if (ip_version == "v4" || ip_version == "ipv4") {
-        version = XDB_IPv4;
-    } else if (ip_version == "v6" || ip_version == "ipv6") {
-        version = XDB_IPv6;
-    } else {
-        Napi::Error::New(env, "Invalid IP version").ThrowAsJavaScriptException();
+    // Determine IP version
+    xdb_version_t* version = (ip_version == "v4" || ip_version == "ipv4") ? XDB_IPv4 : 
+                            (ip_version == "v6" || ip_version == "ipv6") ? XDB_IPv6 : nullptr;
+    
+    if (!version) {
+        xdb_clean_winsock();
+        Napi::Error::New(env, "Invalid IP version. Use 'v4' or 'v6'").ThrowAsJavaScriptException();
         return;
     }
 
-    // 根据缓存策略初始化searcher
+    // Initialize searcher based on cache strategy
     if (cache_policy == "file") {
         err = xdb_new_with_file_only(version, &searcher, db_path.c_str());
     } else if (cache_policy == "vectorIndex") {
         v_index = xdb_load_vector_index_from_file(db_path.c_str());
-        if (v_index == nullptr) {
-            Napi::Error::New(env, "Failed to load vector index").ThrowAsJavaScriptException();
+        if (!v_index) {
+            xdb_clean_winsock();
+            Napi::Error::New(env, "Failed to load vector index from database file").ThrowAsJavaScriptException();
             return;
         }
         err = xdb_new_with_vector_index(version, &searcher, db_path.c_str(), v_index);
     } else if (cache_policy == "content") {
         c_buffer = xdb_load_content_from_file(db_path.c_str());
-        if (c_buffer == nullptr) {
-            Napi::Error::New(env, "Failed to load content").ThrowAsJavaScriptException();
+        if (!c_buffer) {
+            xdb_clean_winsock();
+            Napi::Error::New(env, "Failed to load database content into memory").ThrowAsJavaScriptException();
             return;
         }
         err = xdb_new_with_buffer(version, &searcher, c_buffer);
     } else {
-        Napi::Error::New(env, "Invalid cache policy").ThrowAsJavaScriptException();
+        xdb_clean_winsock();
+        Napi::Error::New(env, "Invalid cache policy. Use 'file', 'vectorIndex', or 'content'").ThrowAsJavaScriptException();
         return;
     }
 
     if (err != 0) {
-        Napi::Error::New(env, "Failed to create searcher").ThrowAsJavaScriptException();
+        if (v_index) xdb_free_vector_index(v_index);
+        if (c_buffer) xdb_free_content(c_buffer);
+        xdb_clean_winsock();
+        Napi::Error::New(env, "Failed to initialize IP geolocation searcher").ThrowAsJavaScriptException();
         return;
     }
 
@@ -136,16 +128,16 @@ Ip2RegionSearcher::Ip2RegionSearcher(const Napi::CallbackInfo& info)
 Ip2RegionSearcher::~Ip2RegionSearcher() {
     if (is_initialized) {
         xdb_close(&searcher);
-        
-        if (v_index != nullptr) {
+        if (v_index) {
             xdb_free_vector_index(v_index);
+            v_index = nullptr;
         }
-        
-        if (c_buffer != nullptr) {
+        if (c_buffer) {
             xdb_free_content(c_buffer);
+            c_buffer = nullptr;
         }
-        
         xdb_clean_winsock();
+        is_initialized = false;
     }
 }
 
@@ -159,7 +151,7 @@ Napi::Value Ip2RegionSearcher::Search(const Napi::CallbackInfo& info) {
     }
 
     if (info.Length() < 1 || !info[0].IsString()) {
-        Napi::TypeError::New(env, "Expected string for IP address").ThrowAsJavaScriptException();
+        Napi::TypeError::New(env, "Expected IP address as string").ThrowAsJavaScriptException();
         return env.Null();
     }
 
@@ -168,24 +160,24 @@ Napi::Value Ip2RegionSearcher::Search(const Napi::CallbackInfo& info) {
     xdb_region_buffer_t region;
     int err = xdb_region_buffer_init(&region, nullptr, 0);
     if (err != 0) {
-        Napi::Error::New(env, "Failed to init region buffer").ThrowAsJavaScriptException();
+        Napi::Error::New(env, "Failed to initialize region buffer").ThrowAsJavaScriptException();
         return env.Null();
     }
 
-    long start_time = xdb_now();
+    const long start_time = xdb_now();
     err = xdb_search_by_string(&searcher, ip_string.c_str(), &region);
-    long cost_time = xdb_now() - start_time;
+    const long elapsed_time = xdb_now() - start_time;
 
     if (err != 0) {
         xdb_region_buffer_free(&region);
-        Napi::Error::New(env, "Search failed").ThrowAsJavaScriptException();
+        Napi::Error::New(env, "IP address lookup failed").ThrowAsJavaScriptException();
         return env.Null();
     }
 
     Napi::Object result = Napi::Object::New(env);
     result.Set("region", Napi::String::New(env, region.value ? region.value : ""));
     result.Set("ioCount", Napi::Number::New(env, xdb_get_io_count(&searcher)));
-    result.Set("took", Napi::Number::New(env, cost_time));
+    result.Set("took", Napi::Number::New(env, elapsed_time));
 
     xdb_region_buffer_free(&region);
     return result;
@@ -196,17 +188,14 @@ Napi::Value Ip2RegionSearcher::Close(const Napi::CallbackInfo& info) {
     
     if (is_initialized) {
         xdb_close(&searcher);
-        
-        if (v_index != nullptr) {
+        if (v_index) {
             xdb_free_vector_index(v_index);
             v_index = nullptr;
         }
-        
-        if (c_buffer != nullptr) {
+        if (c_buffer) {
             xdb_free_content(c_buffer);
             c_buffer = nullptr;
         }
-        
         xdb_clean_winsock();
         is_initialized = false;
     }
@@ -214,37 +203,34 @@ Napi::Value Ip2RegionSearcher::Close(const Napi::CallbackInfo& info) {
     return env.Undefined();
 }
 
-// 静态函数用于验证xdb文件
 Napi::Value VerifyXdb(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
     
     if (info.Length() < 1 || !info[0].IsString()) {
-        Napi::TypeError::New(env, "Expected string for db_path").ThrowAsJavaScriptException();
+        Napi::TypeError::New(env, "Expected database path as string").ThrowAsJavaScriptException();
         return env.Null();
     }
     
-    std::string db_path = info[0].As<Napi::String>().Utf8Value();
+    const std::string db_path = info[0].As<Napi::String>().Utf8Value();
     
-    int err = 0;
-    FILE *handle = fopen(db_path.c_str(), "rb");
-    if (handle == NULL) {
-        err = -1;
+    int error_code = 0;
+    FILE* file_handle = std::fopen(db_path.c_str(), "rb");
+    
+    if (!file_handle) {
+        error_code = -1; // File not found or cannot be opened
     } else {
-        // 加载header
-        xdb_header_t *header = xdb_load_header(handle);
-        if (header == NULL) {
-            err = 1;
+        xdb_header_t* header = xdb_load_header(file_handle);
+        if (!header) {
+            error_code = 1; // Invalid file format
         } else {
-            // =只检查header是否正常加载
-            err = 0; // header加载成功即认为文件有效
             xdb_free_header(header);
         }
-        fclose(handle);
+        std::fclose(file_handle);
     }
     
     Napi::Object result = Napi::Object::New(env);
-    result.Set("valid", Napi::Boolean::New(env, err == 0));
-    result.Set("errorCode", Napi::Number::New(env, err));
+    result.Set("valid", Napi::Boolean::New(env, error_code == 0));
+    result.Set("errorCode", Napi::Number::New(env, error_code));
     
     return result;
 }

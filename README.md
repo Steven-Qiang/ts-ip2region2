@@ -41,7 +41,7 @@ const searcher = new Ip2Region('./data/ip2region_v4.xdb', {
 // Query IP address
 const result = searcher.search('120.229.45.2');
 console.log(result);
-// Output: { region: '中国|0|江苏省|苏州市|电信', ioCount: 3, took: 1000 }
+// Output: { region: '中国|广东省|深圳市|移动', ioCount: 3, took: 1000 }
 
 // Clean up
 searcher.close();

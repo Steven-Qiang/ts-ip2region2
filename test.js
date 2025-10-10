@@ -1,97 +1,138 @@
 const { Ip2Region } = require('.');
 const path = require('path');
 
-function runTests() {
-  console.log('开始测试 ip2region Node.js addon...\n');
-
-  // 测试1: 验证xdb文件
-  console.log('测试1: 验证xdb文件');
-  const ipv4DbPath = path.join(__dirname, './data/ip2region_v4.xdb');
-
-  const verifyResult = Ip2Region.verifyDetailed(ipv4DbPath);
-  console.log(`IPv4 xdb文件验证: ${verifyResult.valid ? '通过' : '失败'}`);
-  console.log(`错误代码: ${verifyResult.errorCode}\n`);
-
-  if (!verifyResult.valid) {
-    console.log('请确保xdb文件存在于正确路径');
-    return;
+class TestRunner {
+  constructor() {
+    this.passed = 0;
+    this.failed = 0;
+    this.dbPath = path.join(__dirname, './data/ip2region_v4.xdb');
   }
 
-  // 测试2: 基本查询功能
-  console.log('测试2: 基本查询功能');
-  try {
-    const searcher = new Ip2Region(ipv4DbPath, {
+  assert(condition, message) {
+    if (condition) {
+      console.log(`✓ ${message}`);
+      this.passed++;
+    } else {
+      console.log(`✗ ${message}`);
+      this.failed++;
+    }
+  }
+
+  testFileVerification() {
+    console.log('\n=== File Verification Tests ===');
+    
+    const result = Ip2Region.verifyDetailed(this.dbPath);
+    this.assert(result.valid, 'Database file should be valid');
+    this.assert(result.errorCode === 0, 'Error code should be 0 for valid file');
+    
+    // Test invalid path
+    const invalidResult = Ip2Region.verifyDetailed('./nonexistent.xdb');
+    this.assert(!invalidResult.valid, 'Nonexistent file should be invalid');
+    this.assert(invalidResult.errorCode === -1, 'Error code should be -1 for missing file');
+  }
+
+  testBasicQueries() {
+    console.log('\n=== Basic Query Tests ===');
+    
+    const searcher = new Ip2Region(this.dbPath, {
       cachePolicy: 'vectorIndex',
       ipVersion: 'v4',
     });
 
-    const testIps = ['1.2.3.4', '8.8.8.8', '114.114.114.114', '120.229.45.2'];
+    const testIPs = [
+      { ip: '8.8.8.8', expected: 'string' },
+      { ip: '114.114.114.114', expected: 'string' },
+      { ip: '1.1.1.1', expected: 'string' }
+    ];
 
-    testIps.forEach((ip) => {
+    testIPs.forEach(({ ip, expected }) => {
       const result = searcher.search(ip);
-      console.log(`IP: ${ip} -> ${result.region} (${result.took}μs, IO:${result.ioCount})`);
+      this.assert(typeof result.region === expected, `${ip} should return region as ${expected}`);
+      this.assert(typeof result.ioCount === 'number', `${ip} should return ioCount as number`);
+      this.assert(typeof result.took === 'number', `${ip} should return took as number`);
+      this.assert(result.took >= 0, `${ip} query time should be non-negative`);
     });
 
     searcher.close();
-    console.log('基本查询测试通过\n');
-  } catch (error) {
-    console.error('基本查询测试失败:', error.message);
-    return;
   }
 
-  // 测试3: 不同缓存策略
-  console.log('测试3: 不同缓存策略性能对比');
-  const policies = ['file', 'vectorIndex', 'content'];
-  const testIp = '120.229.45.2';
+  testCacheStrategies() {
+    console.log('\n=== Cache Strategy Tests ===');
+    
+    const policies = ['file', 'vectorIndex', 'content'];
+    const testIP = '8.8.8.8';
 
-  policies.forEach((policy) => {
-    try {
-      const searcher = new Ip2Region(ipv4DbPath, {
-        cachePolicy: policy,
-        ipVersion: 'v4',
-      });
+    policies.forEach(policy => {
+      try {
+        const searcher = new Ip2Region(this.dbPath, {
+          cachePolicy: policy,
+          ipVersion: 'v4',
+        });
 
-      const startTime = Date.now();
-      for (let i = 0; i < 100; i++) {
-        searcher.search(testIp);
+        const result = searcher.search(testIP);
+        this.assert(result && result.region, `${policy} cache should return valid result`);
+        
+        searcher.close();
+      } catch (error) {
+        this.assert(false, `${policy} cache strategy failed: ${error.message}`);
       }
-      const endTime = Date.now();
-
-      console.log(`${policy} 模式: 100次查询耗时 ${endTime - startTime}ms`);
-      searcher.close();
-    } catch (error) {
-      console.error(`${policy} 模式测试失败:`, error.message);
-    }
-  });
-
-  console.log('\n所有测试完成！');
+    });
+  }
 }
 
-// 错误处理测试
-function testErrorHandling() {
-  console.log('\n测试4: 错误处理');
+  testErrorHandling() {
+    console.log('\n=== Error Handling Tests ===');
 
-  try {
-    // 测试无效文件路径
-    const searcher = new Ip2Region('./invalid_path.xdb');
-    console.log('错误: 应该抛出异常');
-  } catch (error) {
-    console.log('无效文件路径处理: 通过');
+    // Test invalid database path
+    try {
+      new Ip2Region('./nonexistent.xdb');
+      this.assert(false, 'Should throw error for invalid database path');
+    } catch (error) {
+      this.assert(true, 'Correctly throws error for invalid database path');
+    }
+
+    // Test invalid IP address
+    const searcher = new Ip2Region(this.dbPath);
+    try {
+      searcher.search('invalid.ip.address');
+      this.assert(false, 'Should throw error for invalid IP address');
+    } catch (error) {
+      this.assert(true, 'Correctly throws error for invalid IP address');
+    }
+    searcher.close();
+
+    // Test empty parameters
+    try {
+      Ip2Region.verify('');
+      this.assert(false, 'Should throw error for empty path');
+    } catch (error) {
+      this.assert(true, 'Correctly throws error for empty path');
+    }
   }
 
-  try {
-    const searcher = new Ip2Region(path.join(__dirname, './data/ip2region_v4.xdb'));
-
-    // 测试无效IP地址
-    const result = searcher.search('invalid.ip.address');
-    console.log('错误: 应该抛出异常');
-    searcher.close();
-  } catch (error) {
-    console.log('无效IP地址处理: 通过');
+  run() {
+    console.log('=== IP2Region Test Suite ===');
+    
+    this.testFileVerification();
+    this.testBasicQueries();
+    this.testCacheStrategies();
+    this.testErrorHandling();
+    
+    console.log(`\n=== Test Results ===`);
+    console.log(`Passed: ${this.passed}`);
+    console.log(`Failed: ${this.failed}`);
+    console.log(`Total:  ${this.passed + this.failed}`);
+    
+    if (this.failed > 0) {
+      console.log('\n❌ Some tests failed!');
+      process.exit(1);
+    } else {
+      console.log('\n✅ All tests passed!');
+    }
   }
 }
 
 if (require.main === module) {
-  runTests();
-  testErrorHandling();
+  const runner = new TestRunner();
+  runner.run();
 }

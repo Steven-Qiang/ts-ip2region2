@@ -1,73 +1,117 @@
 const addon = require('../build/Release/ip2region.node');
 
+// Error codes for verification
+const ERROR_CODES = {
+    SUCCESS: 0,
+    FILE_NOT_FOUND: -1,
+    INVALID_FORMAT: 1,
+} as const;
+
 export interface SearchResult {
-    /** 地理位置信息字符串 */
+    /** Geographic location information string */
     region: string;
-    /** IO操作次数 */
+    /** Number of IO operations */
     ioCount: number;
-    /** 查询耗时(微秒) */
+    /** Query time in microseconds */
     took: number;
 }
 
 export interface Ip2RegionOptions {
-    /** 缓存策略: 'file' | 'vectorIndex' | 'content' */
+    /** Cache strategy: 'file' | 'vectorIndex' | 'content' */
     cachePolicy?: 'file' | 'vectorIndex' | 'content';
-    /** IP版本: 'v4' | 'v6' */
+    /** IP version: 'v4' | 'v6' */
     ipVersion?: 'v4' | 'v6';
 }
 
 export interface VerifyResult {
-    /** 验证结果 */
+    /** Verification result */
     valid: boolean;
-    /** 错误代码 */
+    /** Error code */
     errorCode: number;
 }
 
 export default class Ip2Region {
     private searcher: any;
+    private readonly dbPath: string;
+    private readonly options: Required<Ip2RegionOptions>;
 
     /**
-     * 创建ip2region查询器实例
-     * @param dbPath xdb数据库文件路径
-     * @param options 配置选项
+     * Create ip2region searcher instance
+     * @param dbPath Path to xdb database file
+     * @param options Configuration options
      */
     constructor(dbPath: string, options: Ip2RegionOptions = {}) {
-        this.searcher = new addon.Ip2RegionSearcher(dbPath, options);
+        if (!dbPath || typeof dbPath !== 'string') {
+            throw new TypeError('Database path must be a non-empty string');
+        }
+        
+        this.dbPath = dbPath;
+        this.options = {
+            cachePolicy: options.cachePolicy || 'vectorIndex',
+            ipVersion: options.ipVersion || 'v4',
+        };
+        
+        this.searcher = new addon.Ip2RegionSearcher(dbPath, this.options);
     }
 
     /**
-     * 查询IP地址对应的地理位置信息
-     * @param ip IP地址字符串(支持IPv4和IPv6)
-     * @returns 查询结果
+     * Query geographic location information for IP address
+     * @param ip IP address string (supports IPv4 and IPv6)
+     * @returns Query result
      */
     search(ip: string): SearchResult {
+        if (!ip || typeof ip !== 'string') {
+            throw new TypeError('IP address must be a non-empty string');
+        }
         return this.searcher.search(ip);
     }
 
     /**
-     * 关闭查询器并释放资源
+     * Close searcher and release resources
      */
     close(): void {
         this.searcher.close();
     }
 
     /**
-     * 验证xdb文件的有效性
-     * @param dbPath xdb文件路径
-     * @returns 验证结果
+     * Verify the validity of xdb file
+     * @param dbPath Path to xdb file
+     * @returns Verification result
      */
     static verify(dbPath: string): boolean {
+        if (!dbPath || typeof dbPath !== 'string') {
+            throw new TypeError('Database path must be a non-empty string');
+        }
         const result = addon.verifyXdb(dbPath);
         return result.valid;
     }
 
     /**
-     * 验证xdb文件并返回详细信息
-     * @param dbPath xdb文件路径
-     * @returns 包含 valid 和 errorCode 的对象
+     * Verify xdb file and return detailed information
+     * @param dbPath Path to xdb file
+     * @returns Object containing valid and errorCode
      */
     static verifyDetailed(dbPath: string): VerifyResult {
+        if (!dbPath || typeof dbPath !== 'string') {
+            throw new TypeError('Database path must be a non-empty string');
+        }
         return addon.verifyXdb(dbPath);
+    }
+
+    /**
+     * Get current configuration
+     * @returns Current options
+     */
+    getOptions(): Required<Ip2RegionOptions> {
+        return { ...this.options };
+    }
+
+    /**
+     * Get database file path
+     * @returns Database path
+     */
+    getDbPath(): string {
+        return this.dbPath;
     }
 }
 
