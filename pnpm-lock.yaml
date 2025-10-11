@@ -73,6 +73,9 @@ importers:
       '@types/node':
         specifier: ^24.7.0
         version: 24.7.0
+      '@types/node-7z':
+        specifier: ^2.1.10
+        version: 2.1.10
       progress:
         specifier: ^2.0.3
         version: 2.0.3
@@ -249,6 +252,9 @@ packages:
   '@sindresorhus/merge-streams@4.0.0':
     resolution: {integrity: sha512-tlqY9xq5ukxTUZBmoOp+m61cqwQD5pHJtFY3Mn8CA8ps6yghLH/Hw8UPdqg4OLmFW3IFlcXnQNmo/dh8HzXYIQ==}
     engines: {node: '>=18'}
+
+  '@types/node-7z@2.1.10':
+    resolution: {integrity: sha512-LdfuQcGAKsLafyM96+F8VekToCuGQnFy9DMM0UdS6f5pEnaP5kAixp3TQPc1NJU4C6IwLwnednktYBjp/z2LRw==}
 
   '@types/node@24.7.0':
     resolution: {integrity: sha512-IbKooQVqUBrlzWTi79E8Fw78l8k1RNtlDDNWsFZs7XonuQSJ8oNYfEeclhprUldXISRMLzBpILuKgPlIxm+/Yw==}
@@ -1982,6 +1988,10 @@ snapshots:
   '@sindresorhus/is@4.6.0': {}
 
   '@sindresorhus/merge-streams@4.0.0': {}
+
+  '@types/node-7z@2.1.10':
+    dependencies:
+      '@types/node': 24.7.0
 
   '@types/node@24.7.0':
     dependencies:

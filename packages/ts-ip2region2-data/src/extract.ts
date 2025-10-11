@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as fs from 'fs';
-const { extractFull } = require('node-7z');
-const sevenBin = require('7zip-bin');
+import { extractFull } from 'node-7z';
+import sevenBin from '7zip-bin';
 
 async function extractData(): Promise<void> {
   const packageDir = path.dirname(__dirname);
@@ -22,6 +22,15 @@ async function extractData(): Promise<void> {
   
   try {
     fs.mkdirSync(extractDir, { recursive: true });
+    
+    // Fix permissions on Linux/macOS
+    if (process.platform !== 'win32') {
+      try {
+        fs.chmodSync(sevenBin.path7za, 0o755);
+      } catch (chmodError) {
+        console.warn('Could not set executable permissions on 7zip binary:', chmodError);
+      }
+    }
     
     const stream = extractFull(archivePath, extractDir, {
       $bin: sevenBin.path7za,
