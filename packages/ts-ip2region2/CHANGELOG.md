@@ -1,3 +1,10 @@
+# [ts-ip2region2-v1.1.1](https://github.com/Steven-Qiang/ts-ip2region2/compare/ts-ip2region2-v1.1.0...ts-ip2region2-v1.1.1) (2025-10-11)
+
+
+### Bug Fixes
+
+* enhance Ip2Region constructor to support options and default database ([9e2f9e2](https://github.com/Steven-Qiang/ts-ip2region2/commit/9e2f9e217491b8cf9eb41aa90c254c686cf1c2e7))
+
 # [ts-ip2region2-v1.1.0](https://github.com/Steven-Qiang/ts-ip2region2/compare/ts-ip2region2-v1.0.2...ts-ip2region2-v1.1.0) (2025-10-11)
 
 
