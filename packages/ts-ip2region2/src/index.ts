@@ -31,13 +31,25 @@ export default class Ip2Region {
 
     /**
      * Create ip2region searcher instance
-     * @param dbPath Path to xdb database file (optional, will use bundled data if not provided)
-     * @param options Configuration options
+     * @param dbPathOrOptions Path to xdb database file or options (when using default path)
+     * @param options Configuration options (when dbPath is provided)
      */
-    constructor(dbPath?: string, options: Ip2RegionOptions = {}) {
+    constructor(dbPathOrOptions?: string | Ip2RegionOptions, options?: Ip2RegionOptions) {
+        let dbPath: string | undefined;
+        let finalOptions: Ip2RegionOptions;
+        
+        // If first parameter is options object, use default dbPath
+        if (typeof dbPathOrOptions === 'object' && dbPathOrOptions !== null) {
+            dbPath = undefined;
+            finalOptions = dbPathOrOptions;
+        } else {
+            dbPath = dbPathOrOptions;
+            finalOptions = options || {};
+        }
+        
         this.options = {
-            cachePolicy: options.cachePolicy || 'vectorIndex',
-            ipVersion: options.ipVersion || 'v4',
+            cachePolicy: finalOptions.cachePolicy || 'vectorIndex',
+            ipVersion: finalOptions.ipVersion || 'v4',
         };
         
         if (!dbPath) {

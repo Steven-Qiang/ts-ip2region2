@@ -25,18 +25,18 @@ pnpm add ts-ip2region2
 yarn add ts-ip2region2
 ```
 
-> **需要数据库**: 使用前请从 [ip2region data](https://github.com/lionsoul2014/ip2region/tree/master/data) 下载 xdb 数据库文件。
+> **数据库已包含**: 数据库文件现已内置，安装时会自动提取。
 
 ## 快速开始
 
 ```typescript
 import { Ip2Region } from 'ts-ip2region2';
 
-// 创建查询器实例
-const searcher = new Ip2Region('./data/ip2region_v4.xdb', {
-  cachePolicy: 'vectorIndex', // file/vectorIndex/content
-  ipVersion: 'v4', // v4/v6
-});
+// 创建查询器实例（使用内置数据）
+const searcher = new Ip2Region();
+
+// 或者使用选项
+const searcher2 = new Ip2Region({ cachePolicy: 'content', ipVersion: 'v6' });
 
 // 查询IP地址
 const result = searcher.search('120.229.45.2');
@@ -52,6 +52,11 @@ searcher.close();
 ### 构造函数
 
 ```typescript
+// 使用默认内置数据
+new Ip2Region()
+new Ip2Region(options: Ip2RegionOptions)
+
+// 使用自定义数据库
 new Ip2Region(dbPath: string, options?: Ip2RegionOptions)
 ```
 

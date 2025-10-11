@@ -40,6 +40,9 @@ import { Ip2Region } from 'ts-ip2region2';
 // Create searcher instance (uses bundled data)
 const searcher = new Ip2Region();
 
+// Or with options
+const searcher2 = new Ip2Region({ cachePolicy: 'content', ipVersion: 'v6' });
+
 // Query IP address
 const result = searcher.search('120.229.45.2');
 console.log(result);
@@ -54,7 +57,12 @@ searcher.close();
 ### Constructor
 
 ```typescript
-new Ip2Region(dbPath?: string, options?: Ip2RegionOptions)
+// Using default bundled data
+new Ip2Region()
+new Ip2Region(options: Ip2RegionOptions)
+
+// Using custom database
+new Ip2Region(dbPath: string, options?: Ip2RegionOptions)
 ```
 
 ### Methods
