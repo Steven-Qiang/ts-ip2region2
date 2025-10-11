@@ -23,9 +23,6 @@ importers:
       '@semantic-release/github':
         specifier: ^11.0.6
         version: 11.0.6(semantic-release@24.2.9(typescript@5.9.3))
-      '@semantic-release/npm':
-        specifier: ^12.0.2
-        version: 12.0.2(semantic-release@24.2.9(typescript@5.9.3))
       '@semantic-release/release-notes-generator':
         specifier: ^14.1.0
         version: 14.1.0(semantic-release@24.2.9(typescript@5.9.3))
@@ -72,13 +69,13 @@ importers:
       node-7z:
         specifier: ^3.0.0
         version: 3.0.0
-      progress:
-        specifier: ^2.0.3
-        version: 2.0.3
     devDependencies:
       '@types/node':
         specifier: ^24.7.0
         version: 24.7.0
+      progress:
+        specifier: ^2.0.3
+        version: 2.0.3
       typescript:
         specifier: ^5.9.3
         version: 5.9.3

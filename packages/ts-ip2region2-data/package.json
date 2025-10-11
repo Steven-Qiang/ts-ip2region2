@@ -25,12 +25,12 @@
   },
   "dependencies": {
     "7zip-bin": "^5.2.0",
-    "node-7z": "^3.0.0",
-    "progress": "^2.0.3"
+    "node-7z": "^3.0.0"
   },
   "devDependencies": {
     "@types/node": "^24.7.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "progress": "^2.0.3"
   },
   "files": [
     "dist/**/*",
