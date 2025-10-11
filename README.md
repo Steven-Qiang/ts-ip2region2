@@ -1,8 +1,13 @@
-# ip2region Node.js (TypeScript)
+# ts-ip2region2 Monorepo
 
 [English](README.md) | [中文](README_CN.md)
 
-High-performance Node.js native addon for ip2region xdb query with IPv4/IPv6 support. Written in TypeScript with full type definitions.
+Monorepo for ts-ip2region2 packages - High-performance Node.js native addon for ip2region xdb query with IPv4/IPv6 support.
+
+## Packages
+
+- [`ts-ip2region2`](./packages/ts-ip2region2) - Main library package
+- [`ts-ip2region2-data`](./packages/ts-ip2region2-data) - Compressed database files
 
 > **Note**: This project is adapted from the official [ip2region C binding](https://github.com/lionsoul2014/ip2region/tree/master/binding/c) and enhanced with TypeScript support.
 
@@ -25,18 +30,15 @@ pnpm add ts-ip2region2
 yarn add ts-ip2region2
 ```
 
-> **Database Required**: Download the xdb database files from [ip2region data](https://github.com/lionsoul2014/ip2region/tree/master/data) before using.
+> **Database Included**: Database files are now bundled and automatically extracted during installation.
 
 ## Quick Start
 
 ```typescript
 import { Ip2Region } from 'ts-ip2region2';
 
-// Create searcher instance
-const searcher = new Ip2Region('./data/ip2region_v4.xdb', {
-  cachePolicy: 'vectorIndex', // file/vectorIndex/content
-  ipVersion: 'v4', // v4/v6
-});
+// Create searcher instance (uses bundled data)
+const searcher = new Ip2Region();
 
 // Query IP address
 const result = searcher.search('120.229.45.2');
@@ -52,7 +54,7 @@ searcher.close();
 ### Constructor
 
 ```typescript
-new Ip2Region(dbPath: string, options?: Ip2RegionOptions)
+new Ip2Region(dbPath?: string, options?: Ip2RegionOptions)
 ```
 
 ### Methods
@@ -104,28 +106,38 @@ npm run build
 npm run compile
 ```
 
+## Development
+
+```bash
+# Install dependencies
+pnpm install
+
+# Build all packages
+pnpm run build
+
+# Run tests
+pnpm run test
+
+# Publish all packages
+pnpm run publish:all
+```
+
 ## Project Structure
 
 ```
 ts-ip2region2/
-├── src/                       # TypeScript source code
-│   └── index.ts              # Main TypeScript API
-├── dist/                      # Compiled JavaScript output
-│   ├── index.js
-│   ├── index.d.ts
-│   └── ...
-├── data/                      # Sample xdb database files
-│   ├── ip2region_v4.xdb
-│   └── ip2region_v6.xdb
-├── ip2region/                 # Original ip2region C source code
-│   ├── xdb_api.h
-│   ├── xdb_util.c
-│   └── xdb_searcher.c
-├── addon.cpp                  # Node.js addon implementation
-├── binding.gyp                # Build configuration
-├── example.js                 # JavaScript example
-├── test.js                    # JavaScript tests
-├── tsconfig.json              # TypeScript configuration
+├── packages/
+│   ├── ts-ip2region2/         # Main library package
+│   │   ├── src/
+│   │   ├── ip2region/
+│   │   ├── addon.cpp
+│   │   ├── binding.gyp
+│   │   └── package.json
+│   └── ts-ip2region2-data/    # Database package
+│       ├── src/
+│       ├── data/
+│       └── package.json
+├── pnpm-workspace.yaml
 ├── package.json
 └── README.md
 ```

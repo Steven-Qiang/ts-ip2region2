@@ -1,0 +1,55 @@
+name: Sync Data and Publish
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # Daily at 2 AM UTC
+  workflow_dispatch: # Manual trigger
+
+jobs:
+  sync-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          always-auth: true
+          registry-url: 'https://registry.npmjs.org'
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install --ignore-scripts
+
+      - name: Build packages
+        run: pnpm run build
+
+      - name: Sync data
+        id: sync
+        run: |
+          cd packages/ts-ip2region2-data
+          if npm run sync; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit and trigger release
+        if: steps.sync.outputs.has_changes == 'true'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add packages/ts-ip2region2-data/data/
+          git commit -m "feat(data): update ip2region database files
+
+          - Updated IPv4 database
+          - Updated IPv6 database
+          - Compressed with 7zip"
+          git push

@@ -1,0 +1,71 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  id-token: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          always-auth: true
+          registry-url: 'https://registry.npmjs.org'
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
+      - name: Cache ip2region data
+        uses: actions/cache@v4
+        with:
+          path: packages/ts-ip2region2-data/data/
+          key: ip2region-data-${{ hashFiles('packages/ts-ip2region2-data/data/checksums.json') }}
+          restore-keys: |
+            ip2region-data-
+
+      - name: Install and build
+        run: |
+          pnpm install --ignore-scripts
+
+          # Fix 7zip permissions
+          find node_modules -name "7za" -type f -exec chmod +x {} \;
+
+          pnpm run build
+
+          # Prepare data for testing
+          cd packages/ts-ip2region2-data
+          if [ ! -f "data/ip2region.7z" ]; then
+            npm run sync
+          fi
+          node dist/extract.js
+
+      - name: Dry Run Semantic Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: pnpm run semantic-release:dry
+
+      - name: Run tests
+        run: pnpm run test
+
+      - name: Release
+        run: pnpm run semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

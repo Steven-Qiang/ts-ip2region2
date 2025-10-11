@@ -1,11 +1,5 @@
 const addon = require('../build/Release/ip2region.node');
-
-// Error codes for verification
-const ERROR_CODES = {
-    SUCCESS: 0,
-    FILE_NOT_FOUND: -1,
-    INVALID_FORMAT: 1,
-} as const;
+import { getDataPaths, isDataExtracted } from 'ts-ip2region2-data';
 
 export interface SearchResult {
     /** Geographic location information string */
@@ -37,21 +31,29 @@ export default class Ip2Region {
 
     /**
      * Create ip2region searcher instance
-     * @param dbPath Path to xdb database file
+     * @param dbPath Path to xdb database file (optional, will use bundled data if not provided)
      * @param options Configuration options
      */
-    constructor(dbPath: string, options: Ip2RegionOptions = {}) {
-        if (!dbPath || typeof dbPath !== 'string') {
-            throw new TypeError('Database path must be a non-empty string');
-        }
-        
-        this.dbPath = dbPath;
+    constructor(dbPath?: string, options: Ip2RegionOptions = {}) {
         this.options = {
             cachePolicy: options.cachePolicy || 'vectorIndex',
             ipVersion: options.ipVersion || 'v4',
         };
         
-        this.searcher = new addon.Ip2RegionSearcher(dbPath, this.options);
+        if (!dbPath) {
+            if (!isDataExtracted()) {
+                throw new Error('Bundled data not found. Please ensure ts-ip2region2-data is properly installed.');
+            }
+            const dataPaths = getDataPaths();
+            this.dbPath = this.options.ipVersion === 'v6' ? dataPaths.v6 : dataPaths.v4;
+        } else {
+            if (typeof dbPath !== 'string') {
+                throw new TypeError('Database path must be a string');
+            }
+            this.dbPath = dbPath;
+        }
+        
+        this.searcher = new addon.Ip2RegionSearcher(this.dbPath, this.options);
     }
 
     /**

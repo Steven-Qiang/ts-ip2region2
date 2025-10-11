@@ -1,11 +1,11 @@
-## [1.0.2](https://github.com/Steven-Qiang/ts-ip2region2/compare/v1.0.1...v1.0.2) (2025-10-10)
+## 1.0.2 (2025-10-10)
 
 
 ### Bug Fixes
 
 * enhance error handling, and improve test coverage ([cc4ef18](https://github.com/Steven-Qiang/ts-ip2region2/commit/cc4ef187372ec56d238fb1998c9e87b5154f0a98))
 
-## [1.0.1](https://github.com/Steven-Qiang/ts-ip2region2/compare/v1.0.0...v1.0.1) (2025-10-09)
+## 1.0.1 (2025-10-09)
 
 
 ### Bug Fixes

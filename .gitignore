@@ -50,6 +50,11 @@ Thumbs.db
 # Data files (not included in repo)
 data/
 
+# Extracted data in packages
+packages/*/extracted/
+
+# Temporary xdb files during sync
+packages/ts-ip2region2-data/data/*.xdb
+
 # Lock files (keep package-lock.json for consistency)
 yarn.lock
-pnpm-lock.yaml

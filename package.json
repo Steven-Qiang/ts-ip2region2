@@ -1,19 +1,14 @@
 {
-  "name": "ts-ip2region2",
-  "version": "1.0.2",
-  "description": "TypeScript-first ip2region implementation with native Node.js addon. Ultra-fast IPv4/IPv6 geolocation queries.",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "name": "ts-ip2region2-monorepo",
+  "version": "1.0.0",
+  "description": "Monorepo for ts-ip2region2 packages",
+  "private": true,
   "scripts": {
-    "build": "node-gyp rebuild",
-    "compile": "tsc",
-    "build:all": "npm run build && npm run compile",
-    "rebuild": "node-gyp rebuild",
-    "clean": "node-gyp clean",
-    "test": "npm run build:all && node test.js",
-    "example": "npm run build:all && node example.js",
-    "prepublishOnly": "npm run build:all",
-    "semantic-release": "semantic-release"
+    "build": "pnpm -r run build",
+    "test": "pnpm -r run test",
+    "sync": "cd packages/ts-ip2region2-data && npm run sync",
+    "semantic-release:dry": "pnpm -r --workspace-concurrency=1 exec -- node ../../scripts/release.mjs --dry-run",
+    "semantic-release": "pnpm -r --workspace-concurrency=1 exec -- node ../../scripts/release.mjs"
   },
   "keywords": [
     "typescript",
@@ -36,44 +31,20 @@
     "url": "https://github.com/Steven-Qiang/ts-ip2region2/issues"
   },
   "homepage": "https://github.com/Steven-Qiang/ts-ip2region2#readme",
-  "dependencies": {
-    "node-addon-api": "^8.5.0"
-  },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/commit-analyzer": "^13.0.1",
+    "@semantic-release/exec": "^7.1.0",
     "@semantic-release/git": "^10.0.1",
     "@semantic-release/github": "^11.0.6",
-    "@semantic-release/npm": "^12.0.2",
     "@semantic-release/release-notes-generator": "^14.1.0",
     "@types/node": "^24.7.0",
-    "node-gyp": "^11.4.2",
     "semantic-release": "^24.2.9",
+    "semantic-release-monorepo": "^8.0.2",
+    "semver": "^7.7.3",
     "typescript": "^5.9.3"
   },
   "engines": {
     "node": ">=16.0.0"
-  },
-  "os": [
-    "darwin",
-    "linux",
-    "win32"
-  ],
-  "cpu": [
-    "x64",
-    "arm64"
-  ],
-  "files": [
-    "dist/**/*",
-    "addon.cpp",
-    "ip2region/**/*",
-    "binding.gyp",
-    "README.md",
-    "README_CN.md"
-  ],
-  "gypfile": true,
-  "publishConfig": {
-    "access": "public",
-    "provenance": true
   }
 }
