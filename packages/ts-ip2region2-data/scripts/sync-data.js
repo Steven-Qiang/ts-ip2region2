@@ -116,13 +116,12 @@ async function syncData() {
     newHashes[version] = hash;
 
     if (currentHashes[version] !== hash) {
-      console.log(`${filename} updated (${hash})`);
+      console.log(`${filename} 'updated (${hash})`);
       hasChanges = true;
     } else {
       console.log(`${filename} unchanged`);
     }
   }
-
   if (hasChanges) {
     console.log('Compressing files...');
     await compressFiles();
@@ -133,18 +132,15 @@ async function syncData() {
     // Clean up xdb files
     fs.unlinkSync(path.join(DATA_DIR, 'ip2region_v4.xdb'));
     fs.unlinkSync(path.join(DATA_DIR, 'ip2region_v6.xdb'));
-
-    return true;
-  } else {
-    console.log('No changes detected');
-    return false;
   }
+  return hasChanges;
 }
 
 if (require.main === module) {
+  const noExitCode = process.argv.includes('--no-exit-code');
   syncData()
     .then((hasChanges) => {
-      process.exit(hasChanges ? 0 : 1);
+      process.exit(noExitCode ? 0 : hasChanges ? 0 : 1);
     })
     .catch(console.error);
 }

@@ -6,7 +6,8 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "sync": "node scripts/sync-data.js",
+    "sync": "node scripts/sync-data.js --no-exit-code",
+    "sync-check": "node scripts/sync-data.js",
     "postinstall": "node dist/extract.js",
     "prepublishOnly": "npm run build"
   },
@@ -28,7 +29,7 @@
     "node-7z": "^3.0.0"
   },
   "devDependencies": {
-    "@types/node": "^24.7.0",
+    "@types/node": "^24.8.1",
     "@types/node-7z": "^2.1.10",
     "progress": "^2.0.3",
     "typescript": "^5.9.3"
@@ -38,6 +39,7 @@
     "data/**/*"
   ],
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   }
 }

@@ -47,9 +47,6 @@ coverage/
 ehthumbs.db
 Thumbs.db
 
-# Data files (not included in repo)
-data/
-
 # Extracted data in packages
 packages/*/extracted/
 

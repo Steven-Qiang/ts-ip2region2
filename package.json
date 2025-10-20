@@ -7,6 +7,7 @@
     "build": "pnpm -r run build",
     "test": "pnpm -r run test",
     "sync": "cd packages/ts-ip2region2-data && npm run sync",
+    "sync-check": "cd packages/ts-ip2region2-data && npm run sync-check",
     "semantic-release:dry": "pnpm -r --workspace-concurrency=1 exec -- node ../../scripts/release.mjs --dry-run",
     "semantic-release": "pnpm -r --workspace-concurrency=1 exec -- node ../../scripts/release.mjs"
   },
@@ -38,7 +39,7 @@
     "@semantic-release/git": "^10.0.1",
     "@semantic-release/github": "^11.0.6",
     "@semantic-release/release-notes-generator": "^14.1.0",
-    "@types/node": "^24.7.0",
+    "@types/node": "^24.8.1",
     "semantic-release": "^24.2.9",
     "semantic-release-monorepo": "^8.0.2",
     "semver": "^7.7.3",
