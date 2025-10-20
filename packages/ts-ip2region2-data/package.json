@@ -1,6 +1,6 @@
 {
   "name": "ts-ip2region2-data",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Compressed ip2region database files for ts-ip2region2",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
