@@ -1,3 +1,10 @@
+# [ts-ip2region2-v1.1.2](https://github.com/Steven-Qiang/ts-ip2region2/compare/ts-ip2region2-v1.1.1...ts-ip2region2-v1.1.2) (2025-10-20)
+
+
+### Bug Fixes
+
+* update sync-and-publish workflow ([11de247](https://github.com/Steven-Qiang/ts-ip2region2/commit/11de2479162fd811aa398e75de6efb9546fc9fef))
+
 # [ts-ip2region2-v1.1.1](https://github.com/Steven-Qiang/ts-ip2region2/compare/ts-ip2region2-v1.1.0...ts-ip2region2-v1.1.1) (2025-10-11)
 
 
