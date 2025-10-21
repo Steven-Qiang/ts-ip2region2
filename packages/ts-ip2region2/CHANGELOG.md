@@ -1,3 +1,10 @@
+# [ts-ip2region2-v1.2.0](https://github.com/Steven-Qiang/ts-ip2region2/compare/ts-ip2region2-v1.1.2...ts-ip2region2-v1.2.0) (2025-10-21)
+
+
+### Features
+
+* update to latest ip2region C binding ([a8f0d1f](https://github.com/Steven-Qiang/ts-ip2region2/commit/a8f0d1fa93e038d2bde72ffd60a23d065ac47d7c))
+
 # [ts-ip2region2-v1.1.2](https://github.com/Steven-Qiang/ts-ip2region2/compare/ts-ip2region2-v1.1.1...ts-ip2region2-v1.1.2) (2025-10-20)
 
 
