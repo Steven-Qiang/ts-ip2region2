@@ -42,6 +42,7 @@ class TestRunner {
 
     testIPs.forEach(({ ip, expected }) => {
       const result = searcher.search(ip);
+      console.log(result);
       this.assert(typeof result.region === expected, `${ip} should return region as ${expected}`);
       this.assert(typeof result.ioCount === 'number', `${ip} should return ioCount as number`);
       this.assert(typeof result.took === 'number', `${ip} should return took as number`);

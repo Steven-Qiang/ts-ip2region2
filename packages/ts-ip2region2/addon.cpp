@@ -213,20 +213,7 @@ Napi::Value VerifyXdb(const Napi::CallbackInfo& info) {
     
     const std::string db_path = info[0].As<Napi::String>().Utf8Value();
     
-    int error_code = 0;
-    FILE* file_handle = std::fopen(db_path.c_str(), "rb");
-    
-    if (!file_handle) {
-        error_code = -1; // File not found or cannot be opened
-    } else {
-        xdb_header_t* header = xdb_load_header(file_handle);
-        if (!header) {
-            error_code = 1; // Invalid file format
-        } else {
-            xdb_free_header(header);
-        }
-        std::fclose(file_handle);
-    }
+    int error_code = xdb_verify_from_file(db_path.c_str());
     
     Napi::Object result = Napi::Object::New(env);
     result.Set("valid", Napi::Boolean::New(env, error_code == 0));
