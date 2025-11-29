@@ -87,11 +87,41 @@ interface Ip2RegionOptions {
 
 ## 缓存策略
 
-| 策略          | 内存占用 | 性能 | 使用场景       |
-| ------------- | -------- | ---- | -------------- |
-| `file`        | 最小     | 良好 | 内存受限环境   |
-| `vectorIndex` | 中等     | 更好 | 一般使用(推荐) |
-| `content`     | 较高     | 最佳 | 高并发场景     |
+| 策略          | 性能 | 使用场景       |
+| ------------- | ---- | -------------- |
+| `file`        | 良好 | 内存受限环境   |
+| `vectorIndex` | 更好 | 一般使用(推荐) |
+| `content`     | 最佳 | 高并发场景     |
+
+## 性能测试
+
+在 Windows x64 + Node.js v22.14.0 环境下的测试结果（10,000次迭代）：
+
+| 缓存策略 | 平均耗时 (μs/op) | QPS |
+|---------|------------------|-----|
+| file | ~31 | ~32,000 |
+| vectorIndex | ~22 | ~45,000 |
+| content | ~1.3 | ~750,000 |
+
+**性能提升：**
+- vectorIndex 比 file 模式快约 40%
+- content 比 vectorIndex 模式快约 95%
+- content 比 file 模式快约 96%
+
+**与原生C对比：**
+- 原生C (vectorIndex): ~5 μs/op
+- Node.js扩展 (vectorIndex): ~22 μs/op
+- 开销: 约4.4倍（主要来自N-API调用开销）
+
+尽管存在N-API开销，但性能仍然非常出色，vectorIndex模式可达到45,000+ QPS。
+
+**推荐：** 大多数场景使用 `vectorIndex` 模式，它在性能和内存占用之间取得了良好的平衡。
+
+运行性能测试：
+```bash
+cd packages/ts-ip2region2
+npm run benchmark
+```
 
 ## 示例
 

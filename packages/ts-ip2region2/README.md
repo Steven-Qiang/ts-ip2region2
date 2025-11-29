@@ -69,6 +69,35 @@ new Ip2Region(dbPath: string, options?: Ip2RegionOptions)
 - `Ip2Region.verify(dbPath: string): boolean` - Verify xdb file
 - `Ip2Region.verifyDetailed(dbPath: string): VerifyResult` - Verify with detailed info
 
+## Performance Benchmark
+
+Benchmark results on Windows x64 with Node.js v22.14.0 (10,000 iterations):
+
+| Cache Strategy | Avg Time (μs/op) | QPS |
+|---------------|------------------|-----|
+| file | ~31 | ~32,000 |
+| vectorIndex | ~22 | ~45,000 |
+| content | ~1.3 | ~750,000 |
+
+**Performance Improvements:**
+- vectorIndex is ~40% faster than file mode
+- content is ~95% faster than vectorIndex mode
+- content is ~96% faster than file mode
+
+**Comparison with Native C:**
+- Native C (vectorIndex): ~5 μs/op
+- Node.js Addon (vectorIndex): ~22 μs/op
+- Overhead: ~4.4x (mainly from N-API call overhead)
+
+Despite the N-API overhead, the performance is still excellent for most use cases, achieving 45,000+ QPS with vectorIndex mode.
+
+**Recommendation:** Use `vectorIndex` for most scenarios as it provides excellent performance with moderate memory usage.
+
+Run benchmark yourself:
+```bash
+npm run benchmark
+```
+
 ## License
 
 Apache-2.0

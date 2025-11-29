@@ -92,11 +92,41 @@ interface Ip2RegionOptions {
 
 ## Cache Strategies
 
-| Strategy      | Memory  | Performance | Use Case                  |
-| ------------- | ------- | ----------- | ------------------------- |
-| `file`        | Minimal | Good        | Memory-constrained        |
-| `vectorIndex` | Medium  | Better      | General use (recommended) |
-| `content`     | High    | Best        | High-concurrency          |
+| Strategy      | Performance | Use Case                  |
+| ------------- | ----------- | ------------------------- |
+| `file`        | Good        | Memory-constrained        |
+| `vectorIndex` | Better      | General use (recommended) |
+| `content`     | Best        | High-concurrency          |
+
+## Performance Benchmark
+
+Benchmark results on Windows x64 with Node.js v22.14.0 (10,000 iterations):
+
+| Cache Strategy | Avg Time (μs/op) | QPS |
+|---------------|------------------|-----|
+| file | ~31 | ~32,000 |
+| vectorIndex | ~22 | ~45,000 |
+| content | ~1.3 | ~750,000 |
+
+**Performance Improvements:**
+- vectorIndex is ~40% faster than file mode
+- content is ~95% faster than vectorIndex mode
+- content is ~96% faster than file mode
+
+**Comparison with Native C:**
+- Native C (vectorIndex): ~5 μs/op
+- Node.js Addon (vectorIndex): ~22 μs/op
+- Overhead: ~4.4x (mainly from N-API call overhead)
+
+Despite the N-API overhead, the performance is still excellent for most use cases, achieving 45,000+ QPS with vectorIndex mode.
+
+**Recommendation:** Use `vectorIndex` for most scenarios as it provides excellent performance with moderate memory usage.
+
+Run benchmark yourself:
+```bash
+cd packages/ts-ip2region2
+npm run benchmark
+```
 
 ## Examples
 

@@ -11,6 +11,7 @@
     "rebuild": "node-gyp rebuild",
     "clean": "node-gyp clean",
     "test": "npm run build:all && node test.js",
+    "benchmark": "node benchmark.js",
     "example": "npm run build:all && node example.js",
     "prepublishOnly": "npm run build:all"
   },

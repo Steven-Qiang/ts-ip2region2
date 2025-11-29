@@ -10,6 +10,33 @@ extern "C" {
 #include "ip2region/xdb_api.h"
 }
 
+#ifdef XDB_WINDOWS
+// Windows UTF-8 path support
+extern "C" {
+    __declspec(dllimport) int __stdcall MultiByteToWideChar(unsigned int, unsigned long, const char*, int, wchar_t*, int);
+}
+#define CP_UTF8 65001
+
+static FILE* fopen_utf8(const char* path, const char* mode) {
+    int path_len = MultiByteToWideChar(CP_UTF8, 0, path, -1, nullptr, 0);
+    if (path_len == 0) return nullptr;
+    
+    wchar_t* wpath = new wchar_t[path_len];
+    MultiByteToWideChar(CP_UTF8, 0, path, -1, wpath, path_len);
+    
+    int mode_len = MultiByteToWideChar(CP_UTF8, 0, mode, -1, nullptr, 0);
+    wchar_t* wmode = new wchar_t[mode_len];
+    MultiByteToWideChar(CP_UTF8, 0, mode, -1, wmode, mode_len);
+    
+    FILE* file = _wfopen(wpath, wmode);
+    delete[] wpath;
+    delete[] wmode;
+    return file;
+}
+#else
+#define fopen_utf8 fopen
+#endif
+
 class Ip2RegionSearcher : public Napi::ObjectWrap<Ip2RegionSearcher> {
 public:
     static Napi::Object Init(Napi::Env env, Napi::Object exports);
@@ -26,9 +53,58 @@ private:
     xdb_vector_index_t* v_index;
     xdb_content_t* c_buffer;
     bool is_initialized;
+    
+    static xdb_vector_index_t* load_vector_index_utf8(const char* path);
+    static xdb_content_t* load_content_utf8(const char* path);
+    static int new_with_file_only_utf8(xdb_version_t* version, xdb_searcher_t* searcher, const char* path);
+    static int new_with_vector_index_utf8(xdb_version_t* version, xdb_searcher_t* searcher, const char* path, const xdb_vector_index_t* v_index);
 };
 
 Napi::FunctionReference Ip2RegionSearcher::constructor;
+
+xdb_vector_index_t* Ip2RegionSearcher::load_vector_index_utf8(const char* path) {
+    FILE* file = fopen_utf8(path, "rb");
+    if (!file) return nullptr;
+    xdb_vector_index_t* v_index = xdb_load_vector_index(file);
+    fclose(file);
+    return v_index;
+}
+
+xdb_content_t* Ip2RegionSearcher::load_content_utf8(const char* path) {
+    FILE* file = fopen_utf8(path, "rb");
+    if (!file) return nullptr;
+    xdb_content_t* content = xdb_load_content(file);
+    fclose(file);
+    return content;
+}
+
+int Ip2RegionSearcher::new_with_file_only_utf8(xdb_version_t* version, xdb_searcher_t* searcher, const char* path) {
+    FILE* file = fopen_utf8(path, "rb");
+    if (!file) return -1;
+    
+    memset(searcher, 0, sizeof(xdb_searcher_t));
+    searcher->version = version;
+    searcher->handle = file;
+    searcher->v_index = nullptr;
+    searcher->content = nullptr;
+    searcher->io_count = 0;
+    
+    return 0;
+}
+
+int Ip2RegionSearcher::new_with_vector_index_utf8(xdb_version_t* version, xdb_searcher_t* searcher, const char* path, const xdb_vector_index_t* v_index) {
+    FILE* file = fopen_utf8(path, "rb");
+    if (!file) return -1;
+    
+    memset(searcher, 0, sizeof(xdb_searcher_t));
+    searcher->version = version;
+    searcher->handle = file;
+    searcher->v_index = v_index;
+    searcher->content = nullptr;
+    searcher->io_count = 0;
+    
+    return 0;
+}
 
 Napi::Object Ip2RegionSearcher::Init(Napi::Env env, Napi::Object exports) {
     Napi::HandleScope scope(env);
@@ -91,17 +167,17 @@ Ip2RegionSearcher::Ip2RegionSearcher(const Napi::CallbackInfo& info)
 
     // Initialize searcher based on cache strategy
     if (cache_policy == "file") {
-        err = xdb_new_with_file_only(version, &searcher, db_path.c_str());
+        err = new_with_file_only_utf8(version, &searcher, db_path.c_str());
     } else if (cache_policy == "vectorIndex") {
-        v_index = xdb_load_vector_index_from_file(db_path.c_str());
+        v_index = load_vector_index_utf8(db_path.c_str());
         if (!v_index) {
             xdb_clean_winsock();
             Napi::Error::New(env, "Failed to load vector index from database file").ThrowAsJavaScriptException();
             return;
         }
-        err = xdb_new_with_vector_index(version, &searcher, db_path.c_str(), v_index);
+        err = new_with_vector_index_utf8(version, &searcher, db_path.c_str(), v_index);
     } else if (cache_policy == "content") {
-        c_buffer = xdb_load_content_from_file(db_path.c_str());
+        c_buffer = load_content_utf8(db_path.c_str());
         if (!c_buffer) {
             xdb_clean_winsock();
             Napi::Error::New(env, "Failed to load database content into memory").ThrowAsJavaScriptException();
@@ -213,7 +289,12 @@ Napi::Value VerifyXdb(const Napi::CallbackInfo& info) {
     
     const std::string db_path = info[0].As<Napi::String>().Utf8Value();
     
-    int error_code = xdb_verify_from_file(db_path.c_str());
+    FILE* file = fopen_utf8(db_path.c_str(), "rb");
+    int error_code = -1;
+    if (file) {
+        error_code = xdb_verify(file);
+        fclose(file);
+    }
     
     Napi::Object result = Napi::Object::New(env);
     result.Set("valid", Napi::Boolean::New(env, error_code == 0));

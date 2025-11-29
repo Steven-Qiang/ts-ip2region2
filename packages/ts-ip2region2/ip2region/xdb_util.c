@@ -245,9 +245,14 @@ XDB_PUBLIC(int) xdb_verify_from_header(FILE *handle, xdb_header_t *header) {
     }
 
     long int fileBytes = ftell(handle);
-    long int maxFilePtr = (1L << (runtime_ptr_bytes * 8)) - 1;
-    // printf("fileBytes: %ld, maxFilePtr: %ld\n", fileBytes, maxFilePtr);
-    if (fileBytes > maxFilePtr) {
+    if (fileBytes < 0) {
+        return 3;
+    }
+    
+    // Use unsigned long long for maxFilePtr to avoid overflow
+    unsigned long long maxFilePtr = (1ULL << (runtime_ptr_bytes * 8)) - 1;
+    // printf("fileBytes: %ld, maxFilePtr: %llu\n", fileBytes, maxFilePtr);
+    if ((unsigned long long)fileBytes > maxFilePtr) {
         return 4;
     }
 
