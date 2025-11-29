@@ -1,3 +1,10 @@
+# [ts-ip2region2-v1.2.1](https://github.com/Steven-Qiang/ts-ip2region2/compare/ts-ip2region2-v1.2.0...ts-ip2region2-v1.2.1) (2025-11-29)
+
+
+### Bug Fixes
+
+* support UTF-8 paths on Windows and add performance benchmark ([0babe2f](https://github.com/Steven-Qiang/ts-ip2region2/commit/0babe2fe8909bb41e8ac694c4e13e63987efec0a))
+
 # [ts-ip2region2-v1.2.0](https://github.com/Steven-Qiang/ts-ip2region2/compare/ts-ip2region2-v1.1.2...ts-ip2region2-v1.2.0) (2025-10-21)
 
 
