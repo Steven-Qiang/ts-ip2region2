@@ -1,3 +1,10 @@
+# [ts-ip2region2-data-v1.4.0](https://github.com/Steven-Qiang/ts-ip2region2/compare/ts-ip2region2-data-v1.3.0...ts-ip2region2-data-v1.4.0) (2026-01-10)
+
+
+### Features
+
+* **data:** update ip2region database files ([2456b51](https://github.com/Steven-Qiang/ts-ip2region2/commit/2456b518d05ba8026f081b6325d7e9ead96c34d3))
+
 # [ts-ip2region2-data-v1.3.0](https://github.com/Steven-Qiang/ts-ip2region2/compare/ts-ip2region2-data-v1.2.0...ts-ip2region2-data-v1.3.0) (2026-01-09)
 
 
