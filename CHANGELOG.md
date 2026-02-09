@@ -1,3 +1,19 @@
+# [1.3.0](https://github.com/Steven-Qiang/ts-ip2region2/compare/v1.2.1...v1.3.0) (2026-02-09)
+
+
+### Bug Fixes
+
+* allow-same-version ([c9c5732](https://github.com/Steven-Qiang/ts-ip2region2/commit/c9c57327e2e1a1f0f84f26b3c3fcfd059d68ab5b))
+* 修复semantic-release ([cbdddfe](https://github.com/Steven-Qiang/ts-ip2region2/commit/cbdddfe5048a0d1a96069b92e820d95add58c07d))
+* 修复数据同步逻辑与package发布流程 ([c62a516](https://github.com/Steven-Qiang/ts-ip2region2/commit/c62a51689ad3d312aceca30d931140eb5e1af400))
+
+
+### Features
+
+* remove monorepo structure and simplify to single package ([8a1a31a](https://github.com/Steven-Qiang/ts-ip2region2/commit/8a1a31a71e53de1fc9f68ec319275a3b008689ed))
+* **ts-ip2region2-data:** update ip2region database files ([43ea42f](https://github.com/Steven-Qiang/ts-ip2region2/commit/43ea42fca36197d2a092ae6b79da679b14586d48))
+* **ts-ip2region2-data:** update ip2region database files ([87420aa](https://github.com/Steven-Qiang/ts-ip2region2/commit/87420aa7715760aa35cb710883ec58107873aa79))
+
 # [v1.2.2](https://github.com/Steven-Qiang/ts-ip2region2/compare/v1.2.1...v1.2.2) (2026-02-09)
 
 
