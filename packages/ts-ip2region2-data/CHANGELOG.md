@@ -1,3 +1,15 @@
+# [ts-ip2region2-data-v1.2.0](https://github.com/Steven-Qiang/ts-ip2region2/compare/ts-ip2region2-data-v1.1.0...ts-ip2region2-data-v1.2.0) (2026-02-09)
+
+
+### Bug Fixes
+
+* 修复数据同步逻辑与package发布流程 ([c62a516](https://github.com/Steven-Qiang/ts-ip2region2/commit/c62a51689ad3d312aceca30d931140eb5e1af400))
+
+
+### Features
+
+* **ts-ip2region2-data:** update ip2region database files ([87420aa](https://github.com/Steven-Qiang/ts-ip2region2/commit/87420aa7715760aa35cb710883ec58107873aa79))
+
 # [ts-ip2region2-data-v1.1.1](https://github.com/Steven-Qiang/ts-ip2region2/compare/ts-ip2region2-data-v1.1.0...ts-ip2region2-data-v1.1.1) (2026-02-09)
 
 
