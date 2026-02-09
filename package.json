@@ -17,8 +17,8 @@
     "sync": "node scripts/sync-data.js --no-exit-code",
     "sync-check": "node scripts/sync-data.js",
     "postinstall": "node scripts/extract.js",
-    "semantic-release": "node scripts/release.mjs",
-    "semantic-release:dry": "node scripts/release.mjs --dry-run",
+    "semantic-release": "semantic-release",
+    "semantic-release:dry": "semantic-release --dry-run",
     "prepublishOnly": "pnpm run build:all"
   },
   "keywords": [
