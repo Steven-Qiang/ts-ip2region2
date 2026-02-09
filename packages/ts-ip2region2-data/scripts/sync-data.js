@@ -12,8 +12,51 @@ const DATA_URLS = {
   v6: 'https://github.com/lionsoul2014/ip2region/raw/refs/heads/master/data/ip2region_v6.xdb',
 };
 
+const DATA_PATHS = {
+  v4: 'data/ip2region_v4.xdb',
+  v6: 'data/ip2region_v6.xdb',
+};
+
+const REPO_OWNER = 'lionsoul2014';
+const REPO_NAME = 'ip2region';
+
 const HASH_FILE = path.join(__dirname, '..', 'data', 'checksums.json');
 const DATA_DIR = path.join(__dirname, '..', 'data');
+
+/**
+ * Get latest commit SHA for a file from GitHub API
+ * @param {string} filePath
+ */
+function getLatestCommitSha(filePath) {
+  return new Promise((resolve, reject) => {
+    const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/commits?path=${filePath}&page=1&per_page=1`;
+    
+    https.get(url, { headers: { 'User-Agent': 'ts-ip2region2-sync' } }, (response) => {
+      let data = '';
+      
+      response.on('data', (chunk) => {
+        data += chunk;
+      });
+      
+      response.on('end', () => {
+        if (response.statusCode !== 200) {
+          return reject(new Error(`GitHub API error: ${response.statusCode}`));
+        }
+        
+        try {
+          const commits = JSON.parse(data);
+          if (commits.length > 0) {
+            resolve(commits[0].sha);
+          } else {
+            reject(new Error('No commits found'));
+          }
+        } catch (err) {
+          reject(err);
+        }
+      });
+    }).on('error', reject);
+  });
+}
 
 /**
  * @param {string} url
@@ -105,35 +148,59 @@ async function syncData() {
   let hasChanges = false;
   const newHashes = {};
 
+  // Check commit SHAs first
+  console.log('Checking for updates via GitHub API...');
+  for (const [version, filePath] of Object.entries(DATA_PATHS)) {
+    try {
+      const commitSha = await getLatestCommitSha(filePath);
+      newHashes[version] = commitSha;
+      
+      console.log(`${filePath}:`);
+      console.log(`  Current: ${currentHashes[version] || 'none'}`);
+      console.log(`  Latest:  ${commitSha}`);
+      
+      if (currentHashes[version] !== commitSha) {
+        console.log(`  Status: UPDATE NEEDED`);
+        hasChanges = true;
+      } else {
+        console.log(`  Status: up-to-date`);
+      }
+    } catch (err) {
+      console.error(`Failed to check ${filePath}: ${err.message}`);
+      throw err;
+    }
+  }
+
+  if (!hasChanges) {
+    console.log('\nNo updates needed.');
+    return false;
+  }
+
+  // Download and compress if there are changes
+  console.log('\nDownloading updated files...');
   for (const [version, url] of Object.entries(DATA_URLS)) {
     const filename = `ip2region_${version}.xdb`;
     const filepath = path.join(DATA_DIR, filename);
-
+    
     console.log(`Downloading ${filename}...`);
     await downloadFile(url, filepath);
+  }
 
-    const hash = calculateHash(filepath);
-    newHashes[version] = hash;
+  console.log('\nCompressing files...');
+  await compressFiles();
 
-    if (currentHashes[version] !== hash) {
-      console.log(`${filename} 'updated (${hash})`);
-      hasChanges = true;
-    } else {
-      console.log(`${filename} unchanged`);
+  fs.writeFileSync(HASH_FILE, JSON.stringify(newHashes, null, 2) + '\n');
+  console.log('Data synchronized and compressed');
+
+  // Clean up xdb files
+  for (const version of Object.keys(DATA_URLS)) {
+    const filepath = path.join(DATA_DIR, `ip2region_${version}.xdb`);
+    if (fs.existsSync(filepath)) {
+      fs.unlinkSync(filepath);
     }
   }
-  if (hasChanges) {
-    console.log('Compressing files...');
-    await compressFiles();
 
-    fs.writeFileSync(HASH_FILE, JSON.stringify(newHashes, null, 2));
-    console.log('Data synchronized and compressed');
-
-    // Clean up xdb files
-    fs.unlinkSync(path.join(DATA_DIR, 'ip2region_v4.xdb'));
-    fs.unlinkSync(path.join(DATA_DIR, 'ip2region_v6.xdb'));
-  }
-  return hasChanges;
+  return true;
 }
 
 if (require.main === module) {
