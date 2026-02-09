@@ -65,12 +65,16 @@ function getCIConfig() {
           changelogFile: 'CHANGELOG.md',
         },
       ],
-      // 使用自定义插件来检查版本
       [
         '@semantic-release/exec',
         {
           verifyReleaseCmd: `node -e "const semver=require('semver');if(!semver.gt('\${nextRelease.version}','${npmLatestVersion}')){console.log('New version not greater than npm version, skipping npm publish');process.exit(0);}"`,
-          publishCmd: 'npm publish',
+        },
+      ],
+      [
+        '@anolilab/semantic-release-pnpm',
+        {
+          npmPublish: true,
         },
       ],
       '@semantic-release/github',
@@ -107,7 +111,9 @@ function getCurrentBranch() {
     const result = await semanticRelease(config);
     if (result) {
       const { lastRelease, commits, nextRelease, releases } = result;
-      console.log(`Published ${nextRelease.type} release version ${nextRelease.version} containing ${commits.length} commits.`);
+      console.log(
+        `Published ${nextRelease.type} release version ${nextRelease.version} containing ${commits.length} commits.`,
+      );
       if (lastRelease.version) {
         console.log(`The last release was "${lastRelease.version}".`);
       }

@@ -8,8 +8,8 @@
     "build": "tsc",
     "sync": "node scripts/sync-data.js --no-exit-code",
     "sync-check": "node scripts/sync-data.js",
-    "postinstall": "node dist/extract.js",
-    "prepublishOnly": "npm run build"
+    "postinstall": "node scripts/extract.js",
+    "prepublishOnly": "pnpm run build"
   },
   "keywords": [
     "ip2region",
@@ -21,7 +21,7 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Steven-Qiang/ts-ip2region2.git",
+    "url": "git+https://github.com/Steven-Qiang/ts-ip2region2.git",
     "directory": "packages/ts-ip2region2-data"
   },
   "dependencies": {
@@ -29,8 +29,8 @@
     "node-7z": "^3.0.0"
   },
   "devDependencies": {
-    "@types/node": "^24.8.1",
-    "@types/node-7z": "^2.1.10",
+    "@types/node": "^25.2.2",
+    "@types/node-7z": "^2.1.11",
     "progress": "^2.0.3",
     "typescript": "^5.9.3"
   },
@@ -40,6 +40,7 @@
   ],
   "publishConfig": {
     "access": "public",
+    "registry": "https://registry.npmjs.org/",
     "provenance": true
   }
 }

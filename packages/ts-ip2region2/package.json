@@ -7,13 +7,13 @@
   "scripts": {
     "build": "node-gyp rebuild",
     "compile": "tsc",
-    "build:all": "npm run build && npm run compile",
+    "build:all": "pnpm run build && pnpm run compile",
     "rebuild": "node-gyp rebuild",
     "clean": "node-gyp clean",
-    "test": "npm run build:all && node test.js",
+    "test": "pnpm run build:all && node test.js",
     "benchmark": "node benchmark.js",
-    "example": "npm run build:all && node example.js",
-    "prepublishOnly": "npm run build:all"
+    "example": "pnpm run build:all && node example.js",
+    "prepublishOnly": "pnpm run build:all"
   },
   "keywords": [
     "typescript",
@@ -30,7 +30,7 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Steven-Qiang/ts-ip2region2.git",
+    "url": "git+https://github.com/Steven-Qiang/ts-ip2region2.git",
     "directory": "packages/ts-ip2region2"
   },
   "bugs": {
@@ -39,11 +39,11 @@
   "homepage": "https://github.com/Steven-Qiang/ts-ip2region2#readme",
   "dependencies": {
     "node-addon-api": "^8.5.0",
-    "ts-ip2region2-data": "*"
+    "ts-ip2region2-data": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "^24.8.1",
-    "node-gyp": "^11.5.0",
+    "@types/node": "^25.2.2",
+    "node-gyp": "^12.2.0",
     "typescript": "^5.9.3"
   },
   "engines": {
@@ -68,6 +68,7 @@
   "gypfile": true,
   "publishConfig": {
     "access": "public",
+    "registry": "https://registry.npmjs.org/",
     "provenance": true
   }
 }

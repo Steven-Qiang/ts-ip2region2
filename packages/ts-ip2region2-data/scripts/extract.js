@@ -1,9 +1,9 @@
-import * as path from 'path';
-import * as fs from 'fs';
-import { extractFull } from 'node-7z';
-import sevenBin from '7zip-bin';
+const path = require('path');
+const fs = require('fs');
+const { extractFull } = require('node-7z');
+const sevenBin = require('7zip-bin');
 
-async function extractData(): Promise<void> {
+async function extractData() {
   const packageDir = path.dirname(__dirname);
   const archivePath = path.join(packageDir, 'data', 'ip2region.7z');
   const extractDir = path.join(packageDir, 'extracted');
@@ -37,13 +37,13 @@ async function extractData(): Promise<void> {
       recursive: true
     });
 
-    await new Promise<void>((resolve, reject) => {
+    await new Promise((resolve, reject) => {
       stream.on('end', () => {
         console.log('Extraction completed successfully');
         resolve();
       });
       
-      stream.on('error', (err: any) => {
+      stream.on('error', (err) => {
         console.error('Extraction failed:', err);
         reject(err);
       });
