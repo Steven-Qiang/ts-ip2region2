@@ -1,4 +1,8 @@
-# ip2region Node.js (TypeScript)
+# ts-ip2region2
+
+[![npm version](https://badge.fury.io/js/ts-ip2region2.svg)](https://badge.fury.io/js/ts-ip2region2)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Node.js CI](https://github.com/Steven-Qiang/ts-ip2region2/workflows/Release/badge.svg)](https://github.com/Steven-Qiang/ts-ip2region2/actions)
 
 [English](README.md) | [中文](README_CN.md)
 
@@ -14,6 +18,7 @@
 - 🔒 **内存安全** - 自动资源管理，防止内存泄漏
 - 📝 **TypeScript** - 包含完整的 TypeScript 类型定义
 - 🔧 **跨平台** - 支持 Windows、Linux 和 macOS
+- 📦 **自动更新数据** - 数据库文件自动同步更新
 
 ## 安装
 
@@ -149,21 +154,28 @@ ts-ip2region2/
 │   ├── index.js
 │   ├── index.d.ts
 │   └── ...
-├── data/                      # 示例 xdb 数据库文件
+├── data/                      # 内置 xdb 数据库文件
+│   ├── checksums.json
+│   └── ip2region.7z
+├── extracted/                 # 解压后的数据库文件
 │   ├── ip2region_v4.xdb
 │   └── ip2region_v6.xdb
 ├── ip2region/                 # 原始 ip2region C 源代码
 │   ├── xdb_api.h
 │   ├── xdb_util.c
 │   └── xdb_searcher.c
+├── scripts/                   # 构建和工具脚本
 ├── addon.cpp                  # Node.js 扩展实现
 ├── binding.gyp                # 构建配置
 ├── example.js                 # JavaScript 示例
-├── test.js                    # JavaScript 测试
 ├── tsconfig.json              # TypeScript 配置
 ├── package.json
 └── README.md
 ```
+
+## 贡献
+
+欢迎贡献代码！请随时提交 Pull Request。
 
 ## 许可证
 

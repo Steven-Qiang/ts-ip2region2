@@ -48,10 +48,10 @@ ehthumbs.db
 Thumbs.db
 
 # Extracted data in packages
-packages/*/extracted/
+extracted/*
 
 # Temporary xdb files during sync
-packages/ts-ip2region2-data/data/*.xdb
+data/*.xdb
 
 # Lock files (keep package-lock.json for consistency)
 yarn.lock

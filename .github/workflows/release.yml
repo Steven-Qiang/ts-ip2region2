@@ -4,17 +4,22 @@ on:
   push:
     branches: [main]
     paths:
-      - 'packages/**'
+      - 'src/**'
+      - 'addon.cpp'
+      - 'ip2region/**'
+      - 'binding.gyp'
+      - 'package.json'
   workflow_dispatch:
 
 permissions:
-  contents: write # to be able to publish a GitHub release
-  issues: write # to be able to comment on released issues
-  pull-requests: write # to be able to comment on released pull requests
-  id-token: write # to enable use of OIDC for trusted publishing and npm provenance
+  contents: write
+  issues: write
+  pull-requests: write
+  id-token: write
 
 jobs:
   release:
+    name: Release
     runs-on: ubuntu-latest
     if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
 
@@ -29,41 +34,31 @@ jobs:
 
       - uses: pnpm/action-setup@v4
 
-      - name: Cache ip2region data
-        uses: actions/cache@v5
-        with:
-          path: packages/ts-ip2region2-data/data/
-          key: ip2region-data-${{ hashFiles('packages/ts-ip2region2-data/data/checksums.json') }}
-          restore-keys: |
-            ip2region-data-
-
       - name: Install dependencies
         run: |
           pnpm install --ignore-scripts
           find node_modules -name "7za" -type f -exec chmod +x {} \;
 
-      - name: Prepare ip2region2 Data
+      - name: Prepare release
         run: |
-          cd packages/ts-ip2region2-data
-          pnpm build
-
+          # Sync data if needed
           if [ ! -f "data/ip2region.7z" ]; then
             pnpm run sync
           fi
-
+          
+          # Extract and build
           node scripts/extract.js
-      - name: Dry Run Semantic Release
+
+      - name: Run Test
+        run: pnpm run test
+
+      - name: Dry run semantic release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: pnpm run semantic-release:dry
 
-      - name: Run tests
-        run: pnpm run test
-
-      - name: Verify the integrity of provenance attestations and registry signatures for installed dependencies
-        run: npm audit signatures
-
       - name: Release
+        if: success()
         run: pnpm run semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

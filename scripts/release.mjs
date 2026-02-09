@@ -3,13 +3,10 @@ import { readFileSync } from 'fs';
 import semanticRelease from 'semantic-release';
 
 function getPackageName() {
-  const packageJson = JSON.parse(readFileSync('package.json', 'utf8'));
+  const packageJson = JSON.parse(readFileSync('../package.json', 'utf8'));
   return packageJson.name;
 }
 
-/**
- * @param {string} packageName
- */
 function getNpmLatestVersion(packageName) {
   try {
     return execSync(`npm view ${packageName} version`, { encoding: 'utf8' }).trim();
@@ -18,44 +15,18 @@ function getNpmLatestVersion(packageName) {
   }
 }
 
-/**
- * @return {Partial<import('semantic-release').GlobalConfig>}
- */
-function getDryRunConfig() {
-  const packageName = getPackageName();
-  return {
-    dryRun: true,
-    repositoryUrl: getLocalRepoUrl(),
-    branches: getCurrentBranch(),
-    extends: 'semantic-release-monorepo',
-    tagFormat: `${packageName}-v\${version}`,
-    plugins: [
-      '@semantic-release/commit-analyzer',
-      '@semantic-release/release-notes-generator',
-      [
-        '@semantic-release/exec',
-        {
-          verifyReleaseCmd: 'npm version ${nextRelease.version} --no-git-tag-version --allow-same-version',
-        },
-      ],
-    ],
-  };
+function isDryRun() {
+  return process.argv.includes('--dry-run');
 }
 
-/**
- * @return {Partial<import('semantic-release').GlobalConfig>}
- */
-function getCIConfig() {
+function getConfig() {
   const packageName = getPackageName();
   const npmLatestVersion = getNpmLatestVersion(packageName);
 
   console.log(`Package ${packageName} latest version on npm: ${npmLatestVersion}`);
 
-  /** @type {Partial<import('semantic-release').GlobalConfig> & {plugins:import('semantic-release').PluginSpec[]}} */
-  const config = {
+  return {
     branches: ['main'],
-    extends: 'semantic-release-monorepo',
-    tagFormat: `${packageName}-v\${version}`,
     plugins: [
       '@semantic-release/commit-analyzer',
       '@semantic-release/release-notes-generator',
@@ -66,13 +37,7 @@ function getCIConfig() {
         },
       ],
       [
-        '@semantic-release/exec',
-        {
-          verifyReleaseCmd: `node -e "const semver=require('semver');if(!semver.gt('\${nextRelease.version}','${npmLatestVersion}')){console.log('New version not greater than npm version, skipping npm publish');process.exit(0);}"`,
-        },
-      ],
-      [
-        '@anolilab/semantic-release-pnpm',
+        '@semantic-release/npm',
         {
           npmPublish: true,
         },
@@ -81,33 +46,18 @@ function getCIConfig() {
       [
         '@semantic-release/git',
         {
-          assets: ['CHANGELOG.md', 'package.json', 'package-lock.json', 'data/checksums.json'],
+          assets: ['CHANGELOG.md', 'package.json', 'data/checksums.json'],
           message: 'chore: release ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}',
         },
       ],
     ],
   };
-
-  return config;
-}
-function isDryRun() {
-  return process.argv.includes('--dry-run');
-}
-
-function getLocalRepoUrl() {
-  const topLevelDir = execSync('git rev-parse --show-toplevel').toString().trim();
-
-  return `file://${topLevelDir}/.git`;
-}
-
-function getCurrentBranch() {
-  return execSync('git rev-parse --abbrev-ref HEAD').toString().trim();
 }
 
 (async () => {
   try {
-    const config = isDryRun() ? getDryRunConfig() : getCIConfig();
-    console.log('config', config);
+    const config = isDryRun() ? { ...getConfig(), dryRun: true } : getConfig();
+    console.log('Running semantic-release...');
     const result = await semanticRelease(config);
     if (result) {
       const { lastRelease, commits, nextRelease, releases } = result;
@@ -125,5 +75,6 @@ function getCurrentBranch() {
     }
   } catch (err) {
     console.error('The automated release failed with %O', err);
+    process.exit(1);
   }
 })();

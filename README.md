@@ -1,15 +1,14 @@
-# ts-ip2region2 Monorepo
+# ts-ip2region2
+
+[![npm version](https://badge.fury.io/js/ts-ip2region2.svg)](https://badge.fury.io/js/ts-ip2region2)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Node.js CI](https://github.com/Steven-Qiang/ts-ip2region2/workflows/Release/badge.svg)](https://github.com/Steven-Qiang/ts-ip2region2/actions)
 
 [English](README.md) | [中文](README_CN.md)
 
-Monorepo for ts-ip2region2 packages - High-performance Node.js native addon for ip2region xdb query with IPv4/IPv6 support.
+High-performance Node.js native addon for ip2region xdb query with IPv4/IPv6 support. Written in TypeScript with full type definitions.
 
-## Packages
-
-- [`ts-ip2region2`](./packages/ts-ip2region2) - Main library package
-- [`ts-ip2region2-data`](./packages/ts-ip2region2-data) - Compressed database files
-
-> **Note**: This project is adapted from the official [ip2region C binding](https://github.com/lionsoul2014/ip2region/tree/master/binding/c) and enhanced with TypeScript support.
+> **Note**: This project is based on the official [ip2region C client](https://github.com/lionsoul2014/ip2region/tree/master/binding/c) with enhanced TypeScript support.
 
 ## Features
 
@@ -19,6 +18,7 @@ Monorepo for ts-ip2region2 packages - High-performance Node.js native addon for 
 - 🔒 **Memory Safe** - Automatic resource management prevents memory leaks
 - 📝 **TypeScript** - Complete TypeScript type definitions included
 - 🔧 **Cross Platform** - Works on Windows, Linux, and macOS
+- 📦 **Auto-Updated Data** - Database files are automatically synced daily
 
 ## Installation
 
@@ -42,6 +42,12 @@ const searcher = new Ip2Region();
 
 // Or with options
 const searcher2 = new Ip2Region({ cachePolicy: 'content', ipVersion: 'v6' });
+
+// Or specify custom database path
+const searcher3 = new Ip2Region('./custom.xdb', {
+  cachePolicy: 'vectorIndex',
+  ipVersion: 'v4'
+});
 
 // Query IP address
 const result = searcher.search('120.229.45.2');
@@ -75,12 +81,12 @@ new Ip2Region(dbPath: string, options?: Ip2RegionOptions)
 - `Ip2Region.verify(dbPath: string): boolean` - Verify xdb file
 - `Ip2Region.verifyDetailed(dbPath: string): VerifyResult` - Verify with detailed info
 
-### Types
+### Type Definitions
 
 ```typescript
 interface SearchResult {
   region: string; // Geographic location
-  ioCount: number; // IO operation count
+  ioCount: number; // Number of IO operations
   took: number; // Query time in microseconds
 }
 
@@ -92,11 +98,11 @@ interface Ip2RegionOptions {
 
 ## Cache Strategies
 
-| Strategy      | Performance | Use Case                  |
-| ------------- | ----------- | ------------------------- |
-| `file`        | Good        | Memory-constrained        |
-| `vectorIndex` | Better      | General use (recommended) |
-| `content`     | Best        | High-concurrency          |
+| Strategy | Performance | Use Case |
+|----------|-------------|----------|
+| `file` | Good | Memory-constrained environments |
+| `vectorIndex` | Better | General use (recommended) |
+| `content` | Best | High-concurrency scenarios |
 
 ## Performance Benchmark
 
@@ -124,7 +130,6 @@ Despite the N-API overhead, the performance is still excellent for most use case
 
 Run benchmark yourself:
 ```bash
-cd packages/ts-ip2region2
 npm run benchmark
 ```
 
@@ -144,41 +149,38 @@ npm run build
 npm run compile
 ```
 
-## Development
-
-```bash
-# Install dependencies
-pnpm install
-
-# Build all packages
-pnpm run build
-
-# Run tests
-pnpm run test
-
-# Publish all packages
-pnpm run publish:all
-```
-
 ## Project Structure
 
 ```
 ts-ip2region2/
-├── packages/
-│   ├── ts-ip2region2/         # Main library package
-│   │   ├── src/
-│   │   ├── ip2region/
-│   │   ├── addon.cpp
-│   │   ├── binding.gyp
-│   │   └── package.json
-│   └── ts-ip2region2-data/    # Database package
-│       ├── src/
-│       ├── data/
-│       └── package.json
-├── pnpm-workspace.yaml
+├── src/                       # TypeScript source code
+│   └── index.ts              # Main TypeScript API
+├── dist/                      # Compiled JavaScript output
+│   ├── index.js
+│   ├── index.d.ts
+│   └── ...
+├── data/                      # Bundled xdb database files
+│   ├── checksums.json
+│   └── ip2region.7z
+├── extracted/                 # Extracted database files
+│   ├── ip2region_v4.xdb
+│   └── ip2region_v6.xdb
+├── ip2region/                 # Original ip2region C source
+│   ├── xdb_api.h
+│   ├── xdb_util.c
+│   └── xdb_searcher.c
+├── scripts/                   # Build and utility scripts
+├── addon.cpp                  # Node.js addon implementation
+├── binding.gyp                # Build configuration
+├── example.js                 # JavaScript example
+├── tsconfig.json              # TypeScript configuration
 ├── package.json
 └── README.md
 ```
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 

@@ -1,16 +1,25 @@
 {
-  "name": "ts-ip2region2-monorepo",
-  "version": "1.0.0",
-  "description": "Monorepo for ts-ip2region2 packages",
-  "private": true,
+  "name": "ts-ip2region2",
+  "version": "1.2.2",
+  "description": "TypeScript-first ip2region implementation with native Node.js addon. Ultra-fast IPv4/IPv6 geolocation queries.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "packageManager": "pnpm@10.29.2",
   "scripts": {
-    "build": "pnpm -r run build",
-    "test": "pnpm -r run test",
-    "sync": "cd packages/ts-ip2region2-data && pnpm run sync",
-    "sync-check": "cd packages/ts-ip2region2-data && pnpm run sync-check",
-    "semantic-release:dry": "pnpm -r --workspace-concurrency=1 exec -- node ../../scripts/release.mjs --dry-run",
-    "semantic-release": "pnpm -r --workspace-concurrency=1 exec -- node ../../scripts/release.mjs"
+    "build": "node-gyp rebuild",
+    "compile": "tsc",
+    "build:all": "pnpm run build && pnpm run compile",
+    "rebuild": "node-gyp rebuild",
+    "clean": "node-gyp clean",
+    "test": "pnpm run build:all && node scripts/test.js",
+    "benchmark": "node scripts/benchmark.js",
+    "example": "pnpm run build:all && node example.js",
+    "sync": "node scripts/sync-data.js --no-exit-code",
+    "sync-check": "node scripts/sync-data.js",
+    "postinstall": "node scripts/extract.js",
+    "semantic-release": "node scripts/release.mjs",
+    "semantic-release:dry": "node scripts/release.mjs --dry-run",
+    "prepublishOnly": "pnpm run build:all"
   },
   "keywords": [
     "typescript",
@@ -33,21 +42,51 @@
     "url": "https://github.com/Steven-Qiang/ts-ip2region2/issues"
   },
   "homepage": "https://github.com/Steven-Qiang/ts-ip2region2#readme",
+  "dependencies": {
+    "node-addon-api": "^8.5.0",
+    "7zip-bin": "^5.2.0",
+    "node-7z": "^3.0.0"
+  },
   "devDependencies": {
-    "@anolilab/semantic-release-pnpm": "^5.0.0",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/commit-analyzer": "^13.0.1",
-    "@semantic-release/exec": "^7.1.0",
     "@semantic-release/git": "^10.0.1",
     "@semantic-release/github": "^12.0.5",
+    "@semantic-release/npm": "^13.1.4",
     "@semantic-release/release-notes-generator": "^14.1.0",
     "@types/node": "^25.2.2",
+    "@types/node-7z": "^2.1.11",
+    "node-gyp": "^12.2.0",
+    "progress": "^2.0.3",
     "semantic-release": "^25.0.3",
-    "semantic-release-monorepo": "^8.0.2",
-    "semver": "^7.7.4",
     "typescript": "^5.9.3"
   },
   "engines": {
     "node": ">=16.0.0"
+  },
+  "os": [
+    "darwin",
+    "linux",
+    "win32"
+  ],
+  "cpu": [
+    "x64",
+    "arm64"
+  ],
+  "files": [
+    "dist/**/*",
+    "addon.cpp",
+    "ip2region/**/*",
+    "binding.gyp",
+    "data/checksums.json",
+    "data/ip2region.7z",
+    "scripts/extract.js",
+    "README.md"
+  ],
+  "gypfile": true,
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/",
+    "provenance": true
   }
 }
