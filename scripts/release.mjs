@@ -35,7 +35,7 @@ function getDryRunConfig() {
       [
         '@semantic-release/exec',
         {
-          verifyReleaseCmd: 'npm version ${nextRelease.version} --no-git-tag-version',
+          verifyReleaseCmd: 'npm version ${nextRelease.version} --no-git-tag-version --allow-same-version',
         },
       ],
     ],
