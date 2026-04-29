@@ -51,11 +51,3 @@ jobs:
           git add data/checksums.json data/ip2region.7z
           git commit -m "feat: update ip2region database files"
           git push
-
-      - name: Trigger release workflow
-        if: steps.sync.outputs.has_changes == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "Triggering release workflow due to database updates"
-          gh workflow run release.yml --ref main

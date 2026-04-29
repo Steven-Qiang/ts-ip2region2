@@ -10,6 +10,11 @@ on:
       - 'binding.gyp'
       - 'package.json'
   workflow_dispatch:
+  workflow_run:
+    workflows: ["Sync Data"]
+    branches: [main]
+    types:
+      - completed
 
 permissions:
   contents: write
@@ -27,6 +32,9 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+
+      - name: Pull latest changes
+        run: git pull origin main
 
       - uses: actions/setup-node@v6
         with:
