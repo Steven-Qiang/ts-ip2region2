@@ -1,3 +1,15 @@
+# [1.4.0](https://github.com/Steven-Qiang/ts-ip2region2/compare/v1.3.0...v1.4.0) (2026-04-29)
+
+
+### Bug Fixes
+
+* Trigger release workflow ([e669262](https://github.com/Steven-Qiang/ts-ip2region2/commit/e6692624d378ec8203144a3d20ffe88d845f1dd3))
+
+
+### Features
+
+* update ip2region database files ([291d6c0](https://github.com/Steven-Qiang/ts-ip2region2/commit/291d6c0489ed6e1c3638f88de9509891df0a6886))
+
 # [1.3.0](https://github.com/Steven-Qiang/ts-ip2region2/compare/v1.2.1...v1.3.0) (2026-02-09)
 
 
