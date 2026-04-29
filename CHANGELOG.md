@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/Steven-Qiang/ts-ip2region2/compare/v1.4.0...v1.5.0) (2026-04-29)
+
+
+### Features
+
+* merge lionsoul2014/ip2region ([d64e0be](https://github.com/Steven-Qiang/ts-ip2region2/commit/d64e0be473aa42fe4351b5561d56af76f2d613a0))
+
 # [1.4.0](https://github.com/Steven-Qiang/ts-ip2region2/compare/v1.3.0...v1.4.0) (2026-04-29)
 
 
