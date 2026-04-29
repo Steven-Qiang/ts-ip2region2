@@ -5,7 +5,7 @@
 - **Operating System**: win32 x64
 - **Node.js Version**: v24.12.0
 - **Database File**: ip2region_v4.xdb
-- **Test Date**: 2026-02-09T18:51:59.454Z
+- **Test Date**: 2026-04-29T06:08:32.998Z
 
 ## Test Configuration
 
@@ -17,9 +17,9 @@
 
 | Cache Strategy | Total Time(μs) | Avg Time(μs/op) | Avg IO Count | QPS |
 |---------------|-----------------|------------------|--------------|-----|
-| file | 169223 | 16.92 | 4.20 | 59094 |
-| vectorIndex | 123489 | 12.35 | 3.20 | 80979 |
-| content | 11922 | 1.19 | 0.00 | 838778 |
+| file | 167673 | 16.77 | 4.20 | 59640 |
+| vectorIndex | 125168 | 12.52 | 3.20 | 79892 |
+| content | 12366 | 1.24 | 0.00 | 808695 |
 
 ## Cache Strategy Description
 
@@ -37,11 +37,11 @@
 
 ## Performance Comparison
 
-- vectorIndex is 37.0% faster than file mode
-- content is 937.8% faster than vectorIndex mode
-- content is 1321.8% faster than file mode
+- vectorIndex is 33.9% faster than file mode
+- content is 909.7% faster than vectorIndex mode
+- content is 1252.4% faster than file mode
 
 ## Conclusion
 
-content mode provides the best performance with an average query time of 1.19μs and QPS of 838778.
+content mode provides the best performance with an average query time of 1.24μs and QPS of 808695.
 For most application scenarios, we recommend using vectorIndex mode, which achieves a good balance between performance and memory usage.
